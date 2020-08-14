@@ -15,8 +15,8 @@ set +e
 # Create local repository if they don't exist
 aptly repo list -raw | grep "^local$" &> /dev/null
 if [[ $? -ne 0 ]]; then
-    echo -n "Creating local repository..."
     set -e
+    echo -n "Creating local repository..."
     aptly  -distribution ${UBUNTU_RELEASE} -component main \
       repo create local
     echo
@@ -42,27 +42,27 @@ for i in $(seq ${#COMPONENTS[*]}); do
   fi
 
   # Update repository mirrors
-  set +e
-  aptly mirror update ${UBUNTU_RELEASE}-${COMPONENTS[$i]}
   set -e
+  aptly mirror update ${UBUNTU_RELEASE}-${COMPONENTS[$i]}
+  set +e
 
   # Import mirror to local repository
-  set +e
+  set -e
   aptly repo import -architectures=amd64 -with-deps \
     ${UBUNTU_RELEASE}-${COMPONENTS[$i]} local ${PKGS[$i]//|/}
-  set -e
+  set +e
 done
 
 # Publish/Update  local repository
 aptly  publish list | grep ".*${UBUNTU_RELEASE}.* publishes .*local.*"
 if [[ $? -ne 0 ]]; then
-    echo "Publish local repository..."
     set -e
+    echo "Publish local repository..."
     aptly -passphrase="${GPG_PASSWORD}" publish repo local
     set +e
 else
-    echo "Update local repository..."
     set -e
+    echo "Update local repository..."
     aptly -passphrase="${GPG_PASSWORD}" publish update ${UBUNTU_RELEASE}
     set +e
 fi
