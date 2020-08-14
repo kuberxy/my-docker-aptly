@@ -1,6 +1,6 @@
 #! /bin/bash
-set -e
 
+set -e
 UBUNTU_RELEASE=bionic
 KEY_URL="https://archive.cloudera.com/cm6/6.2.0/ubuntu1804/apt/archive.key"
 UPSTREAM_URL=(
@@ -10,35 +10,36 @@ REPOS=(bionic-cm6.2.0)
 COMPONENTS=(contrib)
 PKGS=("oracle-j2sdk1.8 | cloudera-manager-server | cloudera-manager-daemons | cloudera-manager-agent")
 VERS=()
+set +e
 
 # Create local repository if they don't exist
-set +e
 aptly repo list -raw | grep "^local$" &> /dev/null
 if [[ $? -ne 0 ]]; then
     echo -n "Creating local repository..."
+    set -e
     aptly  -distribution ${UBUNTU_RELEASE} -component main \
       repo create local
     echo
+    set +e
 fi
-set -e
 
 # Import repository key
-set +e
-wget -O - ${KEY_URL} | gpg --no-default-keyring --keyring trustedkeys.gpg --import
 set -e
+wget -O - ${KEY_URL} | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+set +e
 
 for i in $(seq ${#COMPONENTS[*]}); do
   i=$((i-1))
 
   # Create repository mirrors
-  set +e
   aptly mirror list -raw | grep "^${UBUNTU_RELEASE}-${COMPONENTS[$i]}$" &> /dev/null
   if [[ $? -ne 0 ]]; then
+    set -e
     aptly mirror create -architectures=amd64 \
       -force-components -filter="${PKGS[$i]} ${VERS[$i]}" -filter-with-deps \
       ${UBUNTU_RELEASE}-${COMPONENTS[$i]} ${UPSTREAM_URL[$i]} ${REPOS[*]} ${COMPONENTS[$i]}
+    set +e
   fi
-  set -e
 
   # Update repository mirrors
   set +e
@@ -53,13 +54,15 @@ for i in $(seq ${#COMPONENTS[*]}); do
 done
 
 # Publish/Update  local repository
-set +e
 aptly  publish list | grep ".*${UBUNTU_RELEASE}.* publishes .*local.*"
 if [[ $? -ne 0 ]]; then
     echo "Publish local repository..."
-    aptly -passphrase="${GPG_PASSWORD}" publish repo local 
+    set -e
+    aptly -passphrase="${GPG_PASSWORD}" publish repo local
+    set +e
 else
     echo "Update local repository..."
+    set -e
     aptly -passphrase="${GPG_PASSWORD}" publish update ${UBUNTU_RELEASE}
+    set +e
 fi
-set -e
