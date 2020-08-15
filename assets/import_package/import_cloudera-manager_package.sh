@@ -2,11 +2,11 @@
 
 set -e
 UBUNTU_RELEASE=bionic
-KEY_URL="https://archive.cloudera.com/cm6/6.2.0/ubuntu1804/apt/archive.key"
+KEY_URL="https://archive.cloudera.com/cm6/6.3.0/ubuntu1804/apt/archive.key"
 UPSTREAM_URL=(
-"http://archive.cloudera.com/cm6/6.2.0/ubuntu1804/apt"
+"http://archive.cloudera.com/cm6/6.3.0/ubuntu1804/apt"
 )
-REPOS=(bionic-cm6.2.0)
+REPOS=(bionic-cm6.3.0)
 COMPONENTS=(contrib)
 PKGS=("oracle-j2sdk1.8 | cloudera-manager-server | cloudera-manager-daemons | cloudera-manager-agent")
 VERS=()
