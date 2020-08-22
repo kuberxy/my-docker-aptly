@@ -25,6 +25,7 @@ docker run \
 -e GPG_PASSWORD="${GPG_PASSWORD}" \
 -e HOSTNAME="${HOSTNAME}" \
 -v ${APTLY_DATADIR}:/var/lib/aptly \
+-v /etc/localtime:/etc/localtime:ro \
 -p ${DOCKER_HOST_PORT}:80 \
 ${LATESTIMAGE}
 # Other useful options
